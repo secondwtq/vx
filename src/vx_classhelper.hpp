@@ -95,6 +95,21 @@ class class_helper {
 			}
 		};
 
+		// static function support
+		// 		try to reuse structures in 'vx_functionbind'
+		template <typename ProtoT, ProtoT& func>
+		struct static_callback_wrapper;
+
+		template <typename ReturnT, typename ... Args, ReturnT (&func) (Args ...)>
+		struct static_callback_wrapper<ReturnT (Args ...), func> {
+			static void register_as(const std::string& name) {
+				info_t *info = info_t::instance();
+				L<ft> classft = L<ft>::New(info->m_isolate, info->m_tempclass);
+				H<ft> methodft = ft::New(info->m_isolate, function_callback_wrapper<ReturnT (Args ...), func>::callback);
+				classft->PrototypeTemplate()->Set(str::NewFromUtf8(info->m_isolate, name.c_str()), methodft->GetFunction());
+			}
+		};
+
 		// template<typename ReturnT, typename ... Args, ReturnT (T::*FuncT)(Args ...)>
 		// static inline void method(const std::string& name, bool readonly = false) {
 		// 	info_t *info = info_t::instance();

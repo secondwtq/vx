@@ -58,6 +58,11 @@ class vx_test {
 		int test_func(int a) {
 			printf("VXX: vx_test::test_func: %d %d\n", this->test, a);
 			return a; }
+
+		static int test_static_func(int a) {
+			printf("VXX: vx_test::test_static_func.\n");
+			return a;
+		}
 };
 
 void ref_test_callback(const FunctionCallbackInfo<v8::Value>& args) {
@@ -155,6 +160,7 @@ int main(int argc, const char *argv[]) {
 		vx::class_helper<vx_test>::property<int, &vx_test::test_readonly>("test_readonly", true);
 		vx::class_helper<vx_test>::property<vx_test *, &vx_test::objref>("objref");
 		vx::class_helper<vx_test>::method_callback_wrapper<decltype(&vx_test::test_func), &vx_test::test_func>::register_as("test_func");
+		vx::class_helper<vx_test>::static_callback_wrapper<decltype(vx_test::test_static_func), vx_test::test_static_func>::register_as("test_static_func");
 		vx::class_helper<vx_test>::register_as(global, "vx_test");
 
 		global->Set(vx::str::NewFromUtf8(isolate, "test_funbind_void"), vx::ft::New(isolate, vx::function_callback_wrapper<void (), test_funbind_void>::callback)->GetFunction());
@@ -170,7 +176,7 @@ int main(int argc, const char *argv[]) {
 		Local<Value> result = script->Run();
 
 		String::Utf8Value utf8(result); // convert to UTF-8 string
-		printf("%s\n", *utf8);
+		printf("Return from %s: %s\n", argv[1], *utf8);
 	}
 
 	// dispose

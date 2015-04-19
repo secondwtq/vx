@@ -31,6 +31,7 @@ print(vx_test);
 var a = new vx_test();
 a.test = 9;
 print(a.test_func(1));
+print(a.test_static_func(2));
 a.objref = new vx_test();
 a.objref.test = 10;
 print(a.test, ' ', a.objref.test);
@@ -42,6 +43,25 @@ print("test_funbind: ", test_funbind);
 print(test_funbind(1, 2, 4));
 print("test_funbind_obj: ", test_funbind_obj);
 print(test_funbind_obj(1, a));
+
+
+
+function global_func_bind_to_obj () {
+
+	var func_bind_to_object = function (val) { this.val = val; }
+	func_bind_to_object.prototype.test_funbind = test_funbind;
+	func_bind_to_object.prototype.test_jsfunction = function (x, y, z) {
+		print('func_bind_to_object::test_jsfunction: ', x, ' ', y, ' ', z, ' self val: ', this.val)
+	}
+
+	var funobj_test = new func_bind_to_object(7);
+	print(funobj_test.test_funbind(1, 2, 4));
+	print(funobj_test.test_jsfunction(1, 2, 4));
+
+}
+
+global_func_bind_to_obj()
+
 // print(a.test0);
 // print(a.objref);
 // print(a.test);
