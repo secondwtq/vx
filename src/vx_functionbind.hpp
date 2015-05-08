@@ -16,14 +16,14 @@ namespace vx {
 
 	template <typename ... T, size_t ... N>
 	inline std::tuple<T ...> construct_args(const callback_func<val>& info, indices<N ...>) {
-		return std::tuple<T ...>{ caster<T>::back(info.GetIsolate(), info[N]) ... }; }
+		return std::forward_as_tuple<T ...>( caster<T>::back(info.GetIsolate(), info[N]) ... ); }
 
 	template <typename ... T>
 	std::tuple<T ...> construct_args(const callback_func<val>& info) {
 		constexpr size_t count = sizeof ... (T);
 		return construct_args<T ...>(info, typename indices_builder<count>::type());
 	}
-
+	
 	template <typename ProtoT, ProtoT& func>
 	struct function_callback_wrapper;
 
@@ -31,13 +31,13 @@ namespace vx {
 	struct function_callback_wrapper<ReturnT (Args ...), func> {
 
 		template <size_t ... N>
-		inline static ReturnT callback(std::tuple<Args ...> args, indices<N ...>) {
+		inline static ReturnT callback(std::tuple<typename caster<Args>::backt ...> args, indices<N ...>) {
 			return func(std::get<N>(args) ...); }
 
 		template <typename U = ReturnT>
 		static typename std::enable_if<!(std::is_void<U>::value)>::type 
 			callback(const callback_func<val>& info) {
-				std::tuple<Args ...> args = construct_args<Args ...>(info);
+				auto args = construct_args<typename caster<Args>::backt ...>(info);
 				info.GetReturnValue().Set(caster<ReturnT>::tov8(info.GetIsolate(), 
 						callback(args, typename indices_builder<sizeof ... (Args)>::type())));
 			}
